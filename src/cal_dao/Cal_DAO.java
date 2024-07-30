@@ -30,10 +30,6 @@ public class Cal_DAO {
 		}
 	}
 	
-	public static Cal_DAO getInstance() {
-		return instance;
-	}
-	
 	public void getConnection() {
 		try {
 			con = DriverManager.getConnection(url, username, password);
@@ -41,7 +37,14 @@ public class Cal_DAO {
 			e.printStackTrace();
 		}//catch
 	}
-	//-------------------------------------- DB
+
+	private static Cal_DAO instance = new Cal_DAO(); // 싱글톤
+	
+	public static Cal_DAO getInstance() {
+		return instance;
+	}
+	
+//-------------------------------------- DB
 	
 	public void menu() {
 		service service = null;
@@ -62,7 +65,6 @@ public class Cal_DAO {
 			service.execute();
 		}
 	}
-	private static Cal_DAO instance = new Cal_DAO(); // 싱글톤
 
 //-----------------------------------------Signup 회원가입
 	public int Signup(Cal_DTO cal_DTO) {
@@ -91,7 +93,6 @@ public class Cal_DAO {
 		}//finally
 		return no;
 	}//Signup
-//-------------------------------------------Signup 회원가입
 //-------------------------------------------id 중복값 확인
 	public boolean isExistId(String id) {
 		boolean exist = false;
@@ -116,5 +117,4 @@ public class Cal_DAO {
 		}//finally
 		return exist;
 	}//isExistId
-//-------------------------------------------id 중복값 확인
-}
+}//Cal_DAO
