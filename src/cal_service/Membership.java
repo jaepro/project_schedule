@@ -16,7 +16,7 @@ public class Membership implements service {
 		
 		System.out.print("이름 : ");
 		String name = sc.next();
-		System.out.print("생년월일 : ");
+		System.out.print("생년월일 6자리 : ");
 		String birth = sc.next();
 		while(true){//while -- 아이디 중복 확인
 			System.out.print("아이디 : ");
