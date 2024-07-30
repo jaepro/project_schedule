@@ -1,13 +1,13 @@
 package calendar;
 
+import cal_dao.Cal_DAO;
+
 public class cal_main {
 
 	public static void main(String[] args) {
-		System.out.println("자두");
-		System.out.println("두리안");
-		System.out.println("안으로시작하는과일이없는데");
-		System.out.println("수정");
-
+		Cal_DAO cal_DAO = new Cal_DAO();
+		cal_DAO.menu();
+		System.out.println("종료");
 	}
 
 }
