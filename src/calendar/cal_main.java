@@ -9,7 +9,6 @@ public class cal_main {
 		Cal_DAO cal_DAO = new Cal_DAO();
 		cal_DAO.menu();
 		System.out.println("종료");
-
 	}
 
 }

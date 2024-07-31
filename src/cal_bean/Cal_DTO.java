@@ -77,7 +77,4 @@ public class Cal_DTO {
 	public void setLastday(int lastday) {
 		this.lastday = lastday;
 	}
-	
-	
-
 }

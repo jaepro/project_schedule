@@ -1,7 +1,6 @@
 package cal_service;
 
 import java.util.Scanner;
-
 import cal_bean.Cal_DTO;
 import cal_dao.Cal_DAO;
 
@@ -23,8 +22,12 @@ public class Membership implements service {
 			System.out.print("아이디 : ");
 			id = sc.next();
 			boolean exist = cal_DAO.isExistId(id);
-			if(exist) System.out.println("사용중인 아이디 입니다.");
-			else {System.out.println("사용 가능한 아이디 입니다."); break;}
+			if(exist) 
+				System.out.println("사용중인 아이디 입니다.");
+			else {
+				System.out.println("사용 가능한 아이디 입니다.");
+				break;
+				}
 		}//while -- 아이디 중복 확인
 		System.out.print("비밀번호 : ");
 		String pwd = sc.next();
@@ -38,5 +41,13 @@ public class Membership implements service {
 		cal_DTO.setPwd(pwd);
 		
 		int no = cal_DAO.Signup(cal_DTO);
-	}
+        
+		if (no > 0) {
+            System.out.println("회원가입이 완료되었습니다.");
+        } else {
+            System.out.println("회원가입에 실패했습니다.");
+        }
+        System.out.println();
+    }
+	
 }

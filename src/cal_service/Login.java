@@ -8,7 +8,6 @@ public class Login implements service {
 	@Override
 	public void execute() {
 		Scanner sc = new Scanner(System.in);
-		System.out.println();
 		Cal_DAO cal_DAO = new Cal_DAO();
 		
 		while(true) {
@@ -24,7 +23,7 @@ public class Login implements service {
 				System.out.println();
 				System.out.println(name + "님 환영합니다.");
 				cal_DAO.Mainmenu(id);
-				System.out.println();
+				break;
 			}
 		}//while
 	}

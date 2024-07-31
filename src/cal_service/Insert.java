@@ -23,7 +23,7 @@ public class Insert implements service {
 		
 		System.out.print("날짜를 입력하세요 : ");
 		String calDate = sc.next();
-		System.out.println("일정을 입력하세요");
+		System.out.print("일정을 입력하세요 : ");
 		String content = sc.next();
 		
 		cal_DTO.setId(id);
