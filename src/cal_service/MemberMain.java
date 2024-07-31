@@ -1,22 +1,15 @@
 package cal_service;
 
-import java.security.DrbgParameters.NextBytes;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Scanner;
 
-import cal_dao.Cal_DAO;
 
-public class MemberMain {
+public class MemberMain implements service{
 
-	Cal_DAO cal_DAO = new Cal_DAO();
+	Select select = new Select(); 
 	
-	public void Membermenu() {
+	@Override
+	public void execute() {
 		Scanner sc = new Scanner(System.in);
-		
 		
 		while(true) {
 			System.out.println();
@@ -30,17 +23,18 @@ public class MemberMain {
 			
 			if(num2 == 4) break;
 			if(num2 == 1) 
-				cal_DAO.Insert(); //상욱씨랑 메소드 명 맞추기
+				select.Insert(); //상욱씨랑 메소드 명 맞추기
 			if(num2 == 2) {
 				System.out.print("날짜를 입력하세요(형식 : YYYY-mm-dd) : ");
 				String CalDate = sc.next();
-				cal_DAO.handleDate(CalDate);				
+				select.handleDate(CalDate);				
 			}//num2 == 2
 			
 			if(num2 == 3)
-				cal_DAO.printCal(); //세현씨랑 메소드 명 맞추기
+				select.printCal(); //세현씨랑 메소드 명 맞추기
 
 		} //while
 		
-	}//Membermenu()	
+	}//execute()		
 }
+	

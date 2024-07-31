@@ -31,7 +31,7 @@ public class Membership implements service {
 		System.out.println("회원가입이 완료되었습니다.");
 		System.out.println();
 		
-		Cal_DTO cal_DTO = new Cal_DTO();
+		Cal_DTO cal_DTO = new Cal_DTO(name, birth, id, pwd);
 		
 		cal_DTO.setName(name);
 		cal_DTO.setBirth(birth);

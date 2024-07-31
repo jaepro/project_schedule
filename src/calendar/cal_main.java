@@ -1,8 +1,5 @@
 package calendar;
 
-
-import java.util.Scanner;
-import cal_service.service;
 import cal_dao.Cal_DAO;
 
 public class cal_main {	
