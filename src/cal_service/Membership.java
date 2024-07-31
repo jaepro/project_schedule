@@ -9,7 +9,8 @@ public class Membership implements service {
 	
 	public void execute() {
 		Scanner sc = new Scanner(System.in);
-		Cal_DAO cal_DAO = Cal_DAO.getInstance();
+		Cal_DAO cal_DAO = new Cal_DAO();
+		Cal_DTO cal_DTO = new Cal_DTO();
 		String id = null;
 		System.out.println();
 		System.out.println("회원가입");
@@ -30,9 +31,7 @@ public class Membership implements service {
 		
 		System.out.println("회원가입이 완료되었습니다.");
 		System.out.println();
-		
-		Cal_DTO cal_DTO = new Cal_DTO(name, birth, id, pwd);
-		
+	
 		cal_DTO.setName(name);
 		cal_DTO.setBirth(birth);
 		cal_DTO.setId(id);

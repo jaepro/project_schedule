@@ -8,7 +8,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-public class Select{
+public class Select implements service {
+	@Override
+	public void execute() {
+		
+	}
 	private String driver = "oracle.jdbc.driver.OracleDriver";
 	private String ur1 = "jdbc:oracle:thin:@localhost:1521:xe";
 	private String username = "c##java";

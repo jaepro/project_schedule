@@ -3,7 +3,7 @@ package cal_bean;
 public class Cal_DTO {
 	private String name, id, pwd, birth, content, calDate; //사용자 정보 변수
 	private int year, month, week, lastday, num;  //달력 만들 때 필요한 변수
-	
+	public Cal_DTO() {}
 	public Cal_DTO(String name, String id, String pwd, String birth) {
 		this.name = name;
 		this.id = id;
