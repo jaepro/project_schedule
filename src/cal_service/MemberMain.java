@@ -42,17 +42,5 @@ public class MemberMain {
 
 		} //while
 		
-	}//Membermenu()
-
-	
-	
-	
-	
-	
-	
-	
-	
-		
-	
-
+	}//Membermenu()	
 }
