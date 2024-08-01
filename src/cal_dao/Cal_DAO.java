@@ -7,10 +7,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 import cal_bean.Cal_DTO;
+import cal_service.Cal_print;
 import cal_service.Insert;
 import cal_service.Login;
 import cal_service.Membership;
@@ -62,6 +65,7 @@ public class Cal_DAO{
 			if(bunho == 4) break;
 			if(bunho == 1) service = new Membership();
 			else if(bunho == 2) service = new Login();
+			else if(bunho == 3) service = new Cal_print();
 			
 			service.execute();
 		}
@@ -319,6 +323,9 @@ public class Cal_DAO{
 		System.out.print("월 입력 : ");
 		month = scan.next();
 		
+		System.out.println();
+		System.out.println(year + "년 " + month + "월 달력");
+		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMd");
 		date = sdf.parse(year+month+"1");
 		
@@ -328,11 +335,16 @@ public class Cal_DAO{
 		int start = Integer.parseInt(cal[0]);
 		int last = Integer.parseInt(cal[1]);
 		
-		String yesCal= printDB(id, year, month);
+		String[][] result =  printDB(id, year, month);
 		
-		display(start, last, yesCal);
+		String[] yesCal = result[0];
+		String[] count = result[1];
+		String[] content = printContent(id, year, month);
+		
+		display(start, last, yesCal, count, content);
 		
 	}
+	//----print calc-------------------
 	public String calc(Date date) throws ParseException {
 		int last=0, start=0;
 		
@@ -343,18 +355,16 @@ public class Cal_DAO{
 		last = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 		return start + "/" + last;
 	}
-	
-	public void display(int start, int last, String yesCal) throws ParseException {
+	//----print display-------------------
+	public void display(int start, int last, String[] yesCal, String[] count, String[] content) throws ParseException {
 		System.out.println();
-		
-		String[] date = yesCal.split(" ");
 		
 		System.out.println("일\t월\t화\t수\t목\t금\t토");
 		
-		int[] check = new int[date.length];
-		for(int j=0; j<date.length; j++) {
+		int[] check = new int[yesCal.length];
+		for(int j=0; j<yesCal.length; j++) {
 			
-			Date day = new SimpleDateFormat("yyyy/MM/dd").parse(date[j]);
+			Date day = new SimpleDateFormat("yyyy/MM/dd").parse(yesCal[j]);
 			String eday = new SimpleDateFormat("d").format(day);
 			check[j] = Integer.parseInt(eday);
 		}
@@ -364,6 +374,16 @@ public class Cal_DAO{
 			System.out.print("\t");
 		}
 		
+		StringBuilder lineBelow = new StringBuilder();
+		StringBuilder lineBelow2 = new StringBuilder();
+		
+		for(int i=1; i<start; i++) {
+			lineBelow.append("\t");
+			lineBelow2.append("\t");
+		}
+		
+		int n=0;
+		
 		for(int i=1; i<=last; i++) {
 			boolean ischeckDay = false;
 			for(int j=0; j < check.length; j++) {
@@ -372,23 +392,41 @@ public class Cal_DAO{
 					break;
 				}
 			}
-		
+
 			if(ischeckDay){
-				System.out.print("*" + i + "\t");
+				System.out.print(i + "\t");
+				lineBelow.append(count[n]).append("개의 일정\t");
+				lineBelow2.append(content[n]).append("\t");
+				n++;
 			}else {
 				System.out.print(i + "\t");
+				lineBelow.append("\t");
+				lineBelow2.append("\t");
 			}
 			
 			if(start%7 == 0) {
 				System.out.println();
+				System.out.println(lineBelow.toString()); // Print the `--` line
+	            lineBelow.setLength(0);
+	            System.out.println(lineBelow2.toString()); // Print the `--` line
+	            lineBelow2.setLength(0);
 			}
 			start++;
 		}
+		
+		 if (start % 7 != 1) {
+		        System.out.println();
+		        System.out.println(lineBelow.toString());
+		        System.out.println(lineBelow2.toString());
+		    }
 	}	
 //----print 달력 출력---------------------------------------------------
+
 //----print DB-------------------------------------------------------
-	public String printDB(String id, String year, String month) {
-		StringBuilder calDate = new StringBuilder();
+	public String[][] printDB(String id, String year, String month) {
+		List<String> dateList = new ArrayList<>();
+        List<String> countList = new ArrayList<>();
+        
 		String dateAll = null;
 
 		int monthInt = Integer.parseInt(month);
@@ -400,7 +438,63 @@ public class Cal_DAO{
 		
 		getConnection();
 		
-		String sql = "SELECT DISTINCT CALDATE FROM CALENDAR WHERE ID = ? AND CALDATE LIKE ?";
+		String sql = "SELECT COUNT(*) AS COUNT, CALDATE FROM CALENDAR WHERE ID = ? AND CALDATE LIKE ? GROUP BY CALDATE";
+
+		try {
+			pstmt = con.prepareStatement(sql);
+			
+			pstmt.setString(1, id);
+			pstmt.setString(2, dateAll + "%");
+			
+			rs = pstmt.executeQuery();
+			
+
+            while (rs.next()) {
+            	String calDate = rs.getString("CALDATE");
+            	int count = rs.getInt("COUNT");
+            	
+            	dateList.add(calDate);
+            	countList.add(String.valueOf(count));
+            	
+            	//calDate.append(rs.getString("CALDATE")).append(" ");
+            }
+            
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			try {
+				if(rs != null) rs.close();
+				if(pstmt != null) pstmt.close();
+				if(con != null) con.close();
+				
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		String[] yesCal = dateList.toArray(new String[0]);
+		String[] count = countList.toArray(new String[0]);
+		
+	    return new String[][] { yesCal, count };
+	}
+	//----print Content-------------------
+	public String[] printContent(String id, String year, String month) {
+		List<String> contentList = new ArrayList<String>();
+		
+		String dateAll = null;
+
+		int monthInt = Integer.parseInt(month);
+		if(monthInt < 10 && monthInt > 0) {
+			dateAll = year + "/0" + month;
+		}else if(monthInt >= 10 && monthInt <= 12) {
+			dateAll = year + "/" + month;
+		}
+		
+		getConnection();
+		
+		String sql = "SELECT CONTENT FROM CALENDAR WHERE ID = ? AND CALDATE LIKE ? AND NUM = 1 ";
 
 		try {
 			pstmt = con.prepareStatement(sql);
@@ -411,9 +505,16 @@ public class Cal_DAO{
 			rs = pstmt.executeQuery();
 			
 			
-            while (rs.next()) {
-            	calDate.append(rs.getString("CALDATE")).append(" ");
-            }
+			while (rs.next()) {
+				String content = rs.getString("CONTENT");
+						
+				if(content !=null && content.length() >4 ) {
+					contentList.add(content.substring(0,3) + "...");
+				}else {
+                    contentList.add(content + "...");
+				}
+				
+           }
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -429,11 +530,10 @@ public class Cal_DAO{
 				e.printStackTrace();
 			}
 		}
-		 if (calDate.length() > 0) {
-		        calDate.setLength(calDate.length() - 1); // Remove the trailing '/'
-		    }
+		
+		String[] postContent = contentList.toArray(new String[0]);
 
-	    return calDate.toString();
+	    return postContent;
 	}
 //----print DB-------------------------------------------------------
 }// Cal_DAO
