@@ -18,6 +18,7 @@ public class Select implements service {
 	@Override
 	public void execute() {
 		
+		
 		System.out.print("날짜를 입력하세요(yyyy-MM-dd) : ");
 		String calDate = sc.nextLine();
 		
@@ -34,11 +35,16 @@ public class Select implements service {
 		}  //calDate를 Date형식으로 변환
 		
 		//현재 시스템의 날짜를 가져옴
+		Date date = new Date();
 		Calendar calendar = Calendar.getInstance();
-		Date sysDate = calendar.getTime();  // 현재 시스템 날짜를 Date 객체로 가져옴
+		calendar.setTime(date);// 시스템의 시간을 date 저장
+		
+		calendar.add(Calendar.DATE, -1);
 			    
+		Date day = calendar.getTime();  //gettime으로 가져와ㅣ서 day에 넣음
+		
 		//calDate랑 sysDate랑 비교  sysDate > sdf => 다시 "날짜를 입력하라는 창이 나오게
-		if (inputDate.before(sysDate)) {// inputDate가 sysDate보다 작으면 TRUE 리턴
+		if (inputDate.before(day)) {// inputDate가 sysDate보다 작으면 TRUE 리턴
 			System.out.println("입력한 날짜는 지났으므로 수정이 불가합니다.");
 		} else {
 		        // 입력된 날짜가 현재 날짜와 같거나 이후일 경우에만 handleDate 실행

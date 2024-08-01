@@ -364,7 +364,7 @@ public class Cal_DAO{
 		int[] check = new int[yesCal.length];
 		for(int j=0; j<yesCal.length; j++) {
 			
-			Date day = new SimpleDateFormat("yyyy/MM/dd").parse(yesCal[j]);
+			Date day = new SimpleDateFormat("yyyy-MM-dd").parse(yesCal[j]);
 			String eday = new SimpleDateFormat("d").format(day);
 			check[j] = Integer.parseInt(eday);
 		}
@@ -431,9 +431,9 @@ public class Cal_DAO{
 
 		int monthInt = Integer.parseInt(month);
 		if(monthInt < 10 && monthInt > 0) {
-			dateAll = year + "/0" + month;
+			dateAll = year + "-0" + month;
 		}else if(monthInt >= 10 && monthInt <= 12) {
-			dateAll = year + "/" + month;
+			dateAll = year + "-" + month;
 		}
 		
 		getConnection();
@@ -487,9 +487,9 @@ public class Cal_DAO{
 
 		int monthInt = Integer.parseInt(month);
 		if(monthInt < 10 && monthInt > 0) {
-			dateAll = year + "/0" + month;
+			dateAll = year + "-0" + month;
 		}else if(monthInt >= 10 && monthInt <= 12) {
-			dateAll = year + "/" + month;
+			dateAll = year + "-" + month;
 		}
 		
 		getConnection();
