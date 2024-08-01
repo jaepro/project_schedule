@@ -35,7 +35,7 @@ public class Insert implements service {
 		
 			
 		while(true) {
-			System.out.print("날짜 8자리를 입력하세요 (YYYYMMDD) : ");
+			System.out.print("\t날짜 8자리를 입력하세요 (YYYYMMDD) : ");
 			calDate = sc.next();
 			if (calDate.matches("\\d{8}")) { // 8자리 확인
 	            int year = Integer.parseInt(calDate.substring(0, 4));
@@ -56,7 +56,7 @@ public class Insert implements service {
 	        }
 		}
 		
-		System.out.print("일정을 입력하세요 : ");
+		System.out.print("\t일정을 입력하세요 : ");
 		String content = sc.next();
 		
 		cal_DTO.setId(id);
@@ -66,8 +66,8 @@ public class Insert implements service {
 		
 		int result = cal_DAO.getInsert(cal_DTO);
 		if(result>0) {
-			System.out.println("일정이 추가되었습니다.");
-		}else System.out.println("일정 추가에 실패하였습니다.");
+			System.out.println("-- 일정이 추가되었습니다. --");
+		}else System.out.println("-- 일정 추가에 실패하였습니다. --");
 		
 		//현재날짜 기준으로 지난 날짜들에 일정추가하는건 못막음.
 	}

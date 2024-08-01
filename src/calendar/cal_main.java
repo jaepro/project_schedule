@@ -8,7 +8,7 @@ public class cal_main {
 
 		Cal_DAO cal_DAO = new Cal_DAO();
 		cal_DAO.menu();
-		System.out.println("시스템이 종료되었습니다.");
+		System.out.println("-- 시스템이 종료되었습니다. --");
 	}
 
 }

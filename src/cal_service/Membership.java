@@ -14,13 +14,13 @@ public class Membership implements service {
 		String id = null;
 		String birth;
 		System.out.println();
-		System.out.println("회원가입");
-		System.out.print("이름 : ");
+		System.out.println("\t<회원가입>");
+		System.out.println();
+		System.out.print("\t이름 : ");
 		String name = sc.next();
 		
-		
 		while(true) {
-			System.out.print("생년월일 6자리 (YYMMDD) : ");
+			System.out.print("\t생년월일 6자리 (YYMMDD) : ");
 			birth = sc.next();
 			if (birth.matches("\\d{6}")) { // 6자리 확인
                 int year = Integer.parseInt(birth.substring(0, 2));
@@ -41,14 +41,17 @@ public class Membership implements service {
             }
 		}
 		while(true){//while -- 아이디 중복 확인
-			System.out.print("아이디 : ");
+			System.out.print("\t아이디 : ");
 			id = sc.next();
 			boolean exist = cal_DAO.isExistId(id);
-			if(exist) System.out.println("사용중인 아이디 입니다.");
-			else {System.out.println("사용 가능한 아이디 입니다."); break;}
+			if(exist) System.out.println("-- 사용중인 아이디 입니다. --");
+			else {
+				System.out.println("-- 사용 가능한 아이디 입니다. --"); 
+				break;
+			}
 		}//while -- 아이디 중복 확인
 		
-		System.out.print("비밀번호 : ");
+		System.out.print("\t비밀번호 : ");
 		String pwd = sc.next();
 		
 		System.out.println();

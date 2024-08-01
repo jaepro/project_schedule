@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 import cal_bean.Cal_DTO;
@@ -54,21 +55,46 @@ public class Cal_DAO{
 
 		//오늘날짜를 인식하여 달력 출력
 		while(true) {
-			System.out.println("<메뉴>");
-			System.out.println("1. 회원가입");
-			System.out.println("2. 로그인");
-			System.out.println("3. 달력보기");
-			System.out.println("4. 종료");
-			System.out.print("번호 입력 : ");
-			int bunho = sc.nextInt();
+			System.out.println();
+			System.out.println("  일정관리 프로그램입니다.");
+			System.out.println("\t<메뉴>");
+			System.out.println("**********************");
+			System.out.println("\t1. 회원가입");
+			System.out.println("\t2. 로그인");
+			System.out.println("\t3. 달력보기");
+			System.out.println("\t4. 종료");
+			System.out.println("**********************");
+			System.out.print("\t번호 입력 : ");
 			
-			if(bunho == 4) break;
-			if(bunho == 1) service = new Membership();
-			else if(bunho == 2) service = new Login();
-			else if(bunho == 3) service = new Cal_print();
+			int bunho = -1;
 			
-			service.execute();
-		}
+			try {
+				bunho = sc.nextInt();
+				
+				if(bunho == 4)
+					break;
+				if(bunho == 1) 
+					service = new Membership();
+				else if(bunho == 2) 
+					service = new Login();
+				else if(bunho == 3) 
+					service = new Cal_print();
+				else {
+					System.out.println();
+					System.out.println("-- 메뉴 중에서 다시 선택하세요. --");
+					System.out.println();
+					continue;
+				}
+				service.execute();
+				
+			}catch(InputMismatchException e) {
+				//e.printStackTrace();
+				System.out.println();
+				System.out.println("-- 숫자 형식으로 입력하세요 --");
+				System.out.println();
+				sc.nextLine(); //남아있는 버퍼를 지울려고 작성함
+			} //try~catch문
+		} //while 문
 	} //menu
 //------------------------------------------------login할시 메인메뉴 출력
 	public void Mainmenu(String id) {
@@ -76,21 +102,43 @@ public class Cal_DAO{
 		service service = null;
 		while(true) {
 			System.out.println();
+			System.out.println("\t<일정 메뉴>");
+			System.out.println("**********************");
 			System.out.println("\t1. 일정 등록");
 			System.out.println("\t2. 일정 검색 및 변경");
 			System.out.println("\t3. 달력 보기");
 			System.out.println("\t4. 로그 아웃");
 			System.out.println("**********************");
 			System.out.print("\t번호 입력 : ");
-			int num2 = sc.nextInt();
 			
-			if(num2 == 4) break;
-			if(num2 == 1) service = new Insert(id);
-			else if(num2 == 2) service = new Select();
-			else if(num2 == 3) service = new Print(id);
-			else {System.out.println("1~4까지 선택해주세요"); continue;}
+			int num = -1;
 			
-			service.execute();
+			try {
+				num = sc.nextInt();
+
+				if(num == 4) 
+					break;
+				if(num == 1) 
+					service = new Insert(id);
+				else if(num == 2) 
+					service = new Select();
+				else if(num == 3) 
+					service = new Print(id);
+				else {
+					System.out.println();
+					System.out.println("-- 메뉴 중에서 다시 선택해주세요 --");
+					System.out.println();
+					continue;
+				}
+				service.execute();
+				
+			}catch(InputMismatchException e) {
+				//e.printStackTrace();
+				System.out.println();
+				System.out.println("-- 숫자 형식으로 입력하세요 --");
+				System.out.println();
+				sc.nextLine(); //남아있는 버퍼를 지울려고 작성함
+			} //try~catch문
 		} //while
 	}//Mainmenu()	
 //-----------------------------------------Signup 회원가입
@@ -98,7 +146,7 @@ public class Cal_DAO{
 		int no = 0;
 		getConnection();
 		try {
-			pstmt = con.prepareStatement("insert into cal_member values(?,?,?,To_Date(?, 'YYMMDD'))");
+			pstmt = con.prepareStatement("insert into cal_member values(?,?,?,To_Date(?, 'yyyy-MM-dd'))");
 			
 			pstmt.setString(1, cal_DTO.getId());
 			pstmt.setString(2, cal_DTO.getPwd());
@@ -261,9 +309,9 @@ public class Cal_DAO{
 
             int su = pstmt.executeUpdate();
             if (su > 0) {
-                System.out.println("일정 업데이트가 성공적했습니다.");
+                System.out.println("-- 일정 업데이트가 성공적했습니다. --");
             } else {
-                System.out.println("일정을 찾을 수 없습니다.");
+                System.out.println("-- 일정을 찾을 수 없습니다. --");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -295,9 +343,9 @@ public class Cal_DAO{
                 pstmt.setString(1, CalDate);
                 pstmt.setInt(2, num);
                 pstmt.executeUpdate();
-                System.out.println("일정 번호가 업데이트되었습니다.");
+                System.out.println("-- 일정 번호가 업데이트되었습니다. --");
             } else {
-                System.out.println("해당 일정을 찾을 수 없습니다.");
+                System.out.println("-- 해당 일정을 찾을 수 없습니다. --");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -318,9 +366,9 @@ public class Cal_DAO{
 		Scanner scan = new Scanner(System.in);
 		
 		System.out.println();
-		System.out.print("년도 입력 : ");
+		System.out.print("\t년도 입력 : ");
 		year = scan.next();
-		System.out.print("월 입력 : ");
+		System.out.print("\t월 입력 : ");
 		month = scan.next();
 		
 		System.out.println();
