@@ -5,6 +5,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Scanner;
 import cal_bean.Cal_DTO;
 import cal_service.Insert;
@@ -79,7 +83,7 @@ public class Cal_DAO{
 			if(num2 == 4) break;
 			if(num2 == 1) service = new Insert(id);
 			else if(num2 == 2) service = new Select();
-			else if(num2 == 3) service = new Print();
+			else if(num2 == 3) service = new Print(id);
 			else {System.out.println("1~4까지 선택해주세요"); continue;}
 			
 			service.execute();
@@ -276,7 +280,136 @@ public class Cal_DAO{
 			}
 		}//try~catch, finally
     }
+// 김세현 - print
+//----print 달력 출력----------------------------------------------------
+	public void Calenderprint(String id) throws ParseException{
+		String year, month;
+		Date date;
+		Scanner scan = new Scanner(System.in);
+		
+		System.out.println();
+		System.out.print("년도 입력 : ");
+		year = scan.next();
+		System.out.print("월 입력 : ");
+		month = scan.next();
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMd");
+		date = sdf.parse(year+month+"1");
+		
+		String calc = calc(date);
+		
+		String[] cal = calc.split("/");
+		int start = Integer.parseInt(cal[0]);
+		int last = Integer.parseInt(cal[1]);
+		
+		String yesCal= printDB(id, year, month);
+		
+		display(start, last, yesCal);
+		
+	}
+	public String calc(Date date) throws ParseException {
+		int last=0, start=0;
+		
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		
+		start = cal.get(Calendar.DAY_OF_WEEK);
+		last = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+		return start + "/" + last;
+	}
+	
+	public void display(int start, int last, String yesCal) throws ParseException {
+		System.out.println();
+		
+		String[] date = yesCal.split(" ");
+		
+		System.out.println("일\t월\t화\t수\t목\t금\t토");
+		
+		int[] check = new int[date.length];
+		for(int j=0; j<date.length; j++) {
+			
+			Date day = new SimpleDateFormat("yyyy/MM/dd").parse(date[j]);
+			String eday = new SimpleDateFormat("d").format(day);
+			check[j] = Integer.parseInt(eday);
+		}
+			
 
+		for(int i=1; i<start; i++) {
+			System.out.print("\t");
+		}
+		
+		for(int i=1; i<=last; i++) {
+			boolean ischeckDay = false;
+			for(int j=0; j < check.length; j++) {
+				if(i ==check[j]) {
+					ischeckDay = true;
+					break;
+				}
+			}
+		
+			if(ischeckDay){
+				System.out.print("*" + i + "\t");
+			}else {
+				System.out.print(i + "\t");
+			}
+			
+			if(start%7 == 0) {
+				System.out.println();
+			}
+			start++;
+		}
+	}	
+//----print 달력 출력---------------------------------------------------
+//----print DB-------------------------------------------------------
+	public String printDB(String id, String year, String month) {
+		 StringBuilder calDate = new StringBuilder();
+		String dateAll = null;
+
+		int monthInt = Integer.parseInt(month);
+		if(monthInt < 10 && monthInt > 0) {
+			dateAll = year + "/0" + month;
+		}else if(monthInt >= 10 && monthInt <= 12) {
+			dateAll = year + "/" + month;
+		}
+		
+		getConnection();
+		
+		String sql = "SELECT DISTINCT CALDATE FROM CALENDAR WHERE ID = ? AND CALDATE LIKE ?";
+
+		try {
+			pstmt = con.prepareStatement(sql);
+			
+			pstmt.setString(1, id);
+			pstmt.setString(2, dateAll + "%");
+			
+			rs = pstmt.executeQuery();
+			
+			
+            while (rs.next()) {
+            	calDate.append(rs.getString("CALDATE")).append(" ");
+            }
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			try {
+				if(rs != null) rs.close();
+				if(pstmt != null) pstmt.close();
+				if(con != null) con.close();
+				
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		 if (calDate.length() > 0) {
+		        calDate.setLength(calDate.length() - 1); // Remove the trailing '/'
+		    }
+
+	    return calDate.toString();
+	}
+//----print DB-------------------------------------------------------
 }// Cal_DAO
 
 
