@@ -229,11 +229,11 @@ public class Cal_DAO{
             pstmt.setInt(2, scheduleNum);
             pstmt.setString(3, CalDate);
 
-            int rowsAffected = pstmt.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Schedule updated successfully.");
+            int su = pstmt.executeUpdate();
+            if (su > 0) {
+                System.out.println("일정 업데이트가 성공적했습니다.");
             } else {
-                System.out.println("No matching schedule found.");
+                System.out.println("일정을 찾을 수 없습니다.");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -362,7 +362,7 @@ public class Cal_DAO{
 //----print 달력 출력---------------------------------------------------
 //----print DB-------------------------------------------------------
 	public String printDB(String id, String year, String month) {
-		 StringBuilder calDate = new StringBuilder();
+		StringBuilder calDate = new StringBuilder();
 		String dateAll = null;
 
 		int monthInt = Integer.parseInt(month);

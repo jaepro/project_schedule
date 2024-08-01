@@ -32,7 +32,6 @@ public class Membership implements service {
 		System.out.print("비밀번호 : ");
 		String pwd = sc.next();
 		
-		System.out.println("회원가입이 완료되었습니다.");
 		System.out.println();
 	
 		cal_DTO.setName(name);
