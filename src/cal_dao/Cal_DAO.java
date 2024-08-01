@@ -142,22 +142,47 @@ public class Cal_DAO{
 	}//isExistId
 //---------------------------------------------------------getInsert 로그인 후 일정 입력
 	public int getInsert(Cal_DTO cal_DTO) {
-		int no=0;
+		int no = 0;
+		int num = 0;
 		getConnection();
 		try {
-			pstmt = con.prepareStatement("insert into calendar values(?,?,?,?)");
+			con.setAutoCommit(false);// 트랜젝션
+			String getNum = "select coalesce(max(num), 0) from calendar where id=? and calDate=?";//coalesce함수는 null이 아닌 첫번째 인자의 값을 반환시켜줌
+			//max(num)의 값이 null 일때 0값이 나올 수 있게해줌. null값이 들어가게 되면 오류가 발생할수도 있기 때문
+			pstmt = con.prepareStatement(getNum);
+			pstmt.setString(1, cal_DTO.getId());
+			pstmt.setString(2, cal_DTO.getCalDate());
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				num = rs.getInt(1) + 1;
+			}
+			rs.close();
+			pstmt.close();
+			
+			String setNum = "insert into calendar values(?,?,?,?)";
+			pstmt = con.prepareStatement(setNum);
 
 			pstmt.setString(1, cal_DTO.getId());
-			pstmt.setInt(2, cal_DTO.getNum());
+			pstmt.setInt(2, num);
 			pstmt.setString(3, cal_DTO.getContent());
 			pstmt.setString(4, cal_DTO.getCalDate());
 			
 			no = pstmt.executeUpdate();
 			
+			con.commit();
 		} catch (SQLException e) {
+			if(con != null) { // 오류 발생시 돌아가기
+				try {
+				con.rollback();
+				} catch(SQLException e2) {
+					e2.printStackTrace();
+				}
+			}
 			e.printStackTrace();
-		}finally{ 
+		} finally{ 
 			try {
+				if(rs != null) rs.close();
 				if(pstmt != null) pstmt.close();
 				if(con != null) con.close();
 			} catch (SQLException e) {
@@ -166,6 +191,7 @@ public class Cal_DAO{
 		}//try~catch, finally
 		return no;
 	}//Insert()
+
 //----------------------------------------LoginCal 로그인
 	public String LoginCal(String id, String pwd) {
 		String name = null;
