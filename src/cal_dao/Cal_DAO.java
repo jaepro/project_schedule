@@ -295,13 +295,13 @@ public class Cal_DAO {
 	}// LoginCal
 //---------------------------------displaySchedules
 
-	public void displaySchedules(String CalDate, String id) {
+	public void displaySchedules(String db_calDate, String id) {
 		getConnection();
 		String sql = "SELECT num, content FROM Calendar WHERE CalDate = ? AND ID = ? ORDER BY NUM";
 
 		try {
 			pstmt = con.prepareStatement(sql);
-			pstmt.setString(1, CalDate);
+			pstmt.setString(1, db_calDate);
 			pstmt.setString(2, id);
 			rs = pstmt.executeQuery();
 
@@ -325,7 +325,7 @@ public class Cal_DAO {
 // 김세현 - update
 //---UpdateDate 날짜변경--------------------------------------------------
 	// ---날짜 입력받기--------------------------------------------
-	public void UpdateDate(String calDate, String id) {
+	public void UpdateDate(String db_calDate, String id) {
 
 		while (true) {
 			System.out.println();
@@ -365,7 +365,7 @@ public class Cal_DAO {
 					if (newMonth >= nowMonth && newMonth <= 12) {
 						if (newMonth == nowMonth && newDay >= nowDay && newDay <= lastDay
 								|| newMonth >= nowMonth && newDay <= lastDay && newDay > 0) {
-							ChangeDate(scheduleNum, newYear, newMonth, newDay, calDate, id);
+							ChangeDate(scheduleNum, newYear, newMonth, newDay, db_calDate, id);
 							System.out.println("일정이 이동되었습니다");
 							break;
 						}
@@ -423,7 +423,7 @@ public class Cal_DAO {
 				cal_DTO.setNum(scheduleNum);
 				cal_DTO.setCalDate(changeDate);
 				ChangeInsert(cal_DTO, content);
-				Delete(scheduleNum, calDate, id);
+				Delete(calDate, id);
 
 			}
 		} catch (SQLException e) {
@@ -503,72 +503,194 @@ public class Cal_DAO {
 
 //---UpdateDate 날짜변경--------------------------------------------------
 //-------------------------------------------Update
-	public void Update(String newContent, int scheduleNum, String CalDate) {
-		getConnection();
-		String sql = "update Calendar set content = ? where num = ? and CALDATE = ?";
-		;
-		try {
-			pstmt = con.prepareStatement(sql);
-			pstmt.setString(1, newContent);
-			pstmt.setInt(2, scheduleNum);
-			pstmt.setString(3, CalDate);
-			int su = pstmt.executeUpdate();
-			if (su > 0) {
-				System.out.println("-- 일정 업데이트가 성공적했습니다. --");
-			} else {
-				System.out.println("-- 일정을 찾을 수 없습니다. --");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (pstmt != null)
-					pstmt.close();
-				if (con != null)
-					con.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		} // try~catch, finally
-	}
+	public void Update(String db_calDate, String id) {
+	    String newContent = null;
+	    int scheduleNum = 0;
+	    int maxNum = 0;
 
+	    try {
+	        getConnection();
+
+	        while (true) {
+	            String sql2 = "select max(num) from calendar where id = ? and caldate = ?";
+	            pstmt = con.prepareStatement(sql2);
+	            pstmt.setString(1, id);
+	            pstmt.setString(2, db_calDate);
+	            rs = pstmt.executeQuery();
+
+	            if (rs.next()) {
+	                maxNum = rs.getInt(1);  // max(num) 값을 가져옴
+	            }
+
+	            System.out.print("\t변경할 일정을 입력하세요 : ");
+	            try {
+	                scheduleNum = sc.nextInt();
+	                sc.nextLine();  // 개행 문자 처리
+
+	                // 일정 번호가 max(num)보다 큰지 확인
+	                if (scheduleNum > maxNum) {
+	                	System.out.println();
+	                    System.out.println("-- 해당 날짜에 존재하는 최대 일정 번호는 " + maxNum + "입니다. 다시 입력하세요. --");
+	                    System.out.println();
+	                } else {
+	                    break; // 일정 번호가 유효하면 루프를 종료
+	                }
+	            } catch (InputMismatchException e) {
+	                System.out.println("-- 유효한 숫자를 입력하세요. --");
+	                sc.nextLine(); // 잘못된 입력 제거
+	            }
+	        }
+
+	        // 일정 내용 입력
+	        System.out.print("\t수정할 일정의 내용을 입력하세요 : ");
+	        newContent = sc.nextLine();
+
+	        // 일정 업데이트
+	        String sql = "update Calendar set content = ? where num = ? and CALDATE = ?";
+	        pstmt = con.prepareStatement(sql);
+	        pstmt.setString(1, newContent);
+	        pstmt.setInt(2, scheduleNum);
+	        pstmt.setString(3, db_calDate);
+	        int su = pstmt.executeUpdate();
+
+	        if (su > 0) {
+	            System.out.println("-- 일정 업데이트가 성공적이었습니다. --");
+	        } else {
+	            System.out.println("-- 일정을 찾을 수 없습니다. --");
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        
+	        if (rs != null) {
+	            try {
+	                rs.close();
+	            } catch (SQLException e) {
+	                e.printStackTrace();
+	            }
+	        }
+	        if (pstmt != null) {
+	            try {
+	                pstmt.close();
+	            } catch (SQLException e) {
+	                e.printStackTrace();
+	            }
+	        }
+	        if (con != null) {
+	            try {
+	                con.close();
+	            } catch (SQLException e) {
+	                e.printStackTrace();
+	            }
+	        }
+	    }
+	}
 //----------------------------------------delete	
-	public void Delete(int num, String CalDate, String id) {
-		getConnection();
+	
+	public void Delete(String db_calDate, String id) {
+		//--getConnection();
+		int maxNum = 0;
+	    int scheduleNum = 0;
+		
+		//System.out.print("\t삭제할 일정의 번호를 입력하세요 : ");
+	    //scheduleNum = sc.nextInt();
+
+	   //-- System.out.print("\t정말 삭제 하시겠습니까? (Y/N) : ");
+	   //-- char confirm = sc.next().charAt(0);
+	    
 		String deleteSql = "delete from Calendar where calDate = ? and num = ? and id =?";
 		String updateSql = "update Calendar set num = num - 1 where calDate = ? and num > ? and id = ?";
+		
 		try {
-			pstmt = con.prepareStatement(deleteSql);
-			pstmt.setString(1, CalDate);
-			pstmt.setInt(2, num);
-			pstmt.setString(3, id);
-			int rowsDeleted = pstmt.executeUpdate();
-			if (rowsDeleted > 0) {
-				System.out.println("삭제가 성공적으로 완료되었습니다.");
-				pstmt = con.prepareStatement(updateSql);
+			getConnection();
+			
+			 while (true) {
+				 String sql2 = "select max(num) from calendar where id = ? and caldate = ?";
+		            pstmt = con.prepareStatement(sql2);
+		            pstmt.setString(1, id);
+		            pstmt.setString(2, db_calDate);
+		            rs = pstmt.executeQuery();
 
-				pstmt.setString(1, CalDate);
-				pstmt.setInt(2, num);
-				pstmt.setString(3, id);
-				pstmt.executeUpdate();
-				System.out.println("-- 일정 번호가 업데이트되었습니다. --");
-			} else {
-				System.out.println("-- 해당 일정을 찾을 수 없습니다. --");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (pstmt != null)
-					pstmt.close();
-				if (con != null)
-					con.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		} // try~catch, finally
+		            if (rs.next()) {
+		                maxNum = rs.getInt(1);  // max(num) 값을 가져옴
+		            }
+		            
+		            System.out.print("\t삭제할 일정의 번호를 입력하세요 : ");
+		            try {
+		            	scheduleNum = sc.nextInt();
+		            	
+		            	if (scheduleNum > maxNum) {
+		            		System.out.println();
+			                System.out.println("-- 해당 날짜에 존재하는 최대 일정 번호는 " + maxNum + "입니다. 다시 입력하세요. --");
+			                System.out.println();
+		            	} else {
+			                 break; // 일정 번호가 유효하면 루프를 종료
+			            }
+		            } catch (InputMismatchException e) {
+		            	System.out.println();
+		                System.out.println("-- 유효한 숫자를 입력하세요. --");
+		                System.out.println();
+		                sc.nextLine(); // 잘못된 입력 제거
+		            }
+			 }//while
+			 
+			 // 삭제 확인
+		        char confirm = ' ';
+		        while (true) {
+		            System.out.print("\t정말 삭제 하시겠습니까? (Y/N) : ");
+		            String input = sc.next().trim().toUpperCase(); // 입력을 대문자로 변환
+
+		            if (input.equals("Y")) {
+		                confirm = 'Y';
+		                break;
+		            } else if (input.equals("N")) {
+		                confirm = 'N';
+		                break;
+		            } else {
+		                System.out.println("-- Y 또는 N을 입력하세요. --");
+		            }
+		        }
+
+		        if (confirm == 'Y') {
+		            pstmt = con.prepareStatement(deleteSql);
+		            pstmt.setString(1, db_calDate);
+		            pstmt.setInt(2, scheduleNum);
+		            pstmt.setString(3, id);
+		            int rowsDeleted = pstmt.executeUpdate();
+		            
+		            if (rowsDeleted > 0) {
+		                System.out.println("삭제가 성공적으로 완료되었습니다.");
+		                
+		                pstmt = con.prepareStatement(updateSql);
+		                pstmt.setString(1, db_calDate);
+		                pstmt.setInt(2, scheduleNum);
+		                pstmt.setString(3, id);
+		                pstmt.executeUpdate();
+		                System.out.println("-- 일정 번호가 업데이트되었습니다. --");
+		            } else {
+		                System.out.println("-- 해당 일정을 찾을 수 없습니다. --");
+		            }
+		        } else {
+		            System.out.println("-- 삭제가 취소되었습니다. --");
+		        }
+		    } catch (SQLException e) {
+		        e.printStackTrace();
+		    } finally {
+		        try {
+		            if (rs != null) {
+		                rs.close();
+		            }
+		            if (pstmt != null) {
+		                pstmt.close();
+		            }
+		            if (con != null) {
+		                con.close();
+		            }
+		        } catch (SQLException e) {
+		            e.printStackTrace();
+		        }
+		    }	
 	}
-
 // 김세현 - print
 //----print 달력 출력----------------------------------------------------
 	public void Calenderprint(String id) throws ParseException {

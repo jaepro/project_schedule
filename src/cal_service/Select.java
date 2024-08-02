@@ -20,7 +20,7 @@ public class Select implements service {
 	
 	@Override
 	public void execute() {
-		
+		/*
 		String calDate = null;
 		System.out.print("\t날짜를 입력하세요(YYYY-MM-DD) : ");
 		try {
@@ -35,12 +35,33 @@ public class Select implements service {
 			System.out.println("-- 형식에 맞게 입력하세요. --");
 			System.out.println();
 		}
-
+*/
+		String calDate = null;
+		String db_calDate = null;
+		
+		while(true) {
+			System.out.print("\t날짜를 입력하세요(yyyymmdd) : ");
+			calDate = sc.next();
+			
+			if(calDate.length() == 8 && calDate.matches("\\d+")) {
+                db_calDate = calDate.substring(0, 4) + "-" + calDate.substring(4, 6) + "-" + calDate.substring(6, 8);
+                
+                System.out.println();
+                calDAO.displaySchedules(db_calDate, id);
+                break;
+                
+            } else {
+                System.out.println();
+                System.out.println("-- 8자리 숫자를 제대로 입력하세요. --");
+                System.out.println();
+            }
+        }
+		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); //calDate를 date형식으로 바꿈
 		Date inputDate = null;
 			
 		try {
-			inputDate = sdf.parse(calDate);
+			inputDate = sdf.parse(db_calDate);
 		} catch (ParseException e) {
 					
 			e.printStackTrace();
@@ -61,13 +82,13 @@ public class Select implements service {
 			System.out.println("-- 입력한 날짜는 지났으므로 수정이 불가합니다. --");
 		} else {
 		        // 입력된 날짜가 현재 날짜와 같거나 이후일 경우에만 handleDate 실행
-			handleDate(calDate);
+			handleDate(db_calDate);
 		}
 	} //execute()
 	
 	
 	
-	public void handleDate(String CalDate) {
+	public void handleDate(String db_calDate) {
 		
 		while(true) {
 			System.out.println();
@@ -86,15 +107,15 @@ public class Select implements service {
 				 num = sc.nextInt();
 				 
 				if(num == 1) {
-					Update(CalDate); 
+					calDAO.Update(db_calDate, id); 
 					break;
 				}
 				else if(num == 2) {
-					calDAO.UpdateDate(CalDate, id); 
+					calDAO.UpdateDate(db_calDate, id); 
 					break;
 				}
 				else if(num == 3) {
-					Delete(CalDate, id); 
+					calDAO.Delete(db_calDate, id); 
 					break;
 				}
 				else if(num == 4)
@@ -113,34 +134,8 @@ public class Select implements service {
 				System.out.println();
 				sc.nextLine(); //남아있는 버퍼를 지울려고 작성함
 			}
-		} //2. 일정 검색 및 변경 눌렀을 때 나오는 메뉴의 while문                                
-		
-	} //handleDate
-	
-	public void Update(String CalDate) {
-		System.out.print("\t변경할 일정을 입력하세요 : ");
-	    int scheduleNum = sc.nextInt();
-	    sc.nextLine();  
-	    System.out.print("\t수정할 일정의 내용을 입력하세요 : ");
-	    String newContent = sc.nextLine();
-
-	    calDAO.Update(newContent, scheduleNum, CalDate);
-	} //Update()	
-		
-	public void Delete(String CalDate, String id) {
-	    System.out.print("\t삭제할 일정의 번호를 입력하세요 : ");
-	    int scheduleNum = sc.nextInt();
-
-	    System.out.print("\t정말 삭제 하시겠습니까? (Y/N) : ");
-	    char confirm = sc.next().charAt(0);
-
-	    if (confirm == 'Y' || confirm == 'y') {
-	    	calDAO.Delete(scheduleNum, CalDate, id);
-	    } else {
-	        System.out.println("-- 삭제를 취소합니다. --");
-	    }
-	}
-		
-	}//delete()
+		}                             
+	}		
+}
 
 
