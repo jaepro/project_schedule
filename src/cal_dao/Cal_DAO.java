@@ -769,7 +769,7 @@ public class Cal_DAO{
 		
 		getConnection();
 		
-		String sql = "SELECT CONTENT FROM CALENDAR WHERE ID = ? AND CALDATE LIKE ? AND NUM = 1 ";
+		String sql = "SELECT CONTENT FROM CALENDAR WHERE ID = ? AND CALDATE LIKE ? AND NUM = 1 ORDER BY CALDATE ";
 
 		try {
 			pstmt = con.prepareStatement(sql);
@@ -783,7 +783,7 @@ public class Cal_DAO{
 			while (rs.next()) {
 				String content = rs.getString("CONTENT");
 						
-				if(content !=null && content.length() >4 ) {
+				if(content !=null && content.length() >3 ) {
 					contentList.add(content.substring(0,3) + "...");
 				}else {
                     contentList.add(content + "...");
