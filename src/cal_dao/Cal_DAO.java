@@ -148,7 +148,7 @@ public class Cal_DAO{
 		int no = 0;
 		getConnection();
 		try {
-			pstmt = con.prepareStatement("insert into cal_member values(?,?,?,To_Date(?, 'yyMMdd'))");
+			pstmt = con.prepareStatement("insert into cal_member values(?,?,?,To_Date(?, 'yyyyMMdd'))");
 			
 			pstmt.setString(1, cal_DTO.getId());
 			pstmt.setString(2, cal_DTO.getPwd());
