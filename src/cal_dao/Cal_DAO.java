@@ -148,7 +148,7 @@ public class Cal_DAO{
 		int no = 0;
 		getConnection();
 		try {
-			pstmt = con.prepareStatement("insert into cal_member values(?,?,?,To_Date(?, 'yyyy-MM-dd'))");
+			pstmt = con.prepareStatement("insert into cal_member values(?,?,?,To_Date(?, 'yyyyMMdd'))");
 			
 			pstmt.setString(1, cal_DTO.getId());
 			pstmt.setString(2, cal_DTO.getPwd());
@@ -203,7 +203,11 @@ public class Cal_DAO{
 		System.out.print("\t일정을 입력하세요 : ");
 		String content = sc.nextLine();
 		sc.nextLine();
+<<<<<<< HEAD
 
+=======
+		
+>>>>>>> c4b47259f18a2c176c6109db3bc5a2302ec6ff7f
 		getConnection();
 		try {
 			con.setAutoCommit(false);// 트랜젝션
@@ -225,7 +229,7 @@ public class Cal_DAO{
 
 			pstmt.setString(1, cal_DTO.getId());
 			pstmt.setInt(2, num);
-			pstmt.setString(3, cal_DTO.getContent());
+			pstmt.setString(3, content);
 			pstmt.setString(4, cal_DTO.getCalDate());
 			
 			no = pstmt.executeUpdate();
