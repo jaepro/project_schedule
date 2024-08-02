@@ -10,10 +10,12 @@ import cal_dao.Cal_DAO;
 
 public class Select implements service {
 	private Cal_DAO calDAO;
+	private String id;
 	Scanner sc = new Scanner(System.in);
 	
-	public Select() {
+	public Select(String id) {
 		calDAO = new Cal_DAO();
+		this.id = id;
 	}
 	
 	@Override
@@ -24,6 +26,7 @@ public class Select implements service {
 		try {
 			calDate = sc.nextLine();
 			
+			System.out.println();//----------------se
 			calDAO.displaySchedules(calDate);
 			
 		}catch(InputMismatchException e) {
@@ -71,8 +74,9 @@ public class Select implements service {
 			System.out.println("\t<일정 수정 메뉴>");
 			System.out.println("**********************");
 			System.out.println("\t1. 일정 변경");
-			System.out.println("\t2. 일정 삭제");
-			System.out.println("\t3. 메인 화면");
+			System.out.println("\t2. 날짜 변경");//---------------------se
+			System.out.println("\t3. 일정 삭제");
+			System.out.println("\t4. 메인 화면");
 			System.out.println("**********************");
 			System.out.print("\t번호 입력 : ");
 			
@@ -84,8 +88,10 @@ public class Select implements service {
 				if(num == 1)
 					Update(CalDate); 
 				else if(num == 2) 
-					Delete(CalDate);
-				else if(num == 3)
+					calDAO.UpdateDate(CalDate, id);//---------------------se
+				else if(num == 3) 
+					Delete(CalDate, id);
+				else if(num == 4)
 					break;
 				else {
 					System.out.println();
@@ -104,7 +110,7 @@ public class Select implements service {
 		} //2. 일정 검색 및 변경 눌렀을 때 나오는 메뉴의 while문                                
 		
 	} //handleDate
-
+	
 	public void Update(String CalDate) {
 		System.out.print("\t변경할 일정을 입력하세요 : ");
 	    int scheduleNum = sc.nextInt();
@@ -113,12 +119,9 @@ public class Select implements service {
 	    String newContent = sc.nextLine();
 
 	    calDAO.Update(newContent, scheduleNum, CalDate);
-		
-		
 	} //Update()	
 		
-	public void Delete(String CalDate) {
-		
+	public void Delete(String CalDate, String id) {
 	    System.out.print("\t삭제할 일정의 번호를 입력하세요 : ");
 	    int scheduleNum = sc.nextInt();
 
@@ -126,7 +129,7 @@ public class Select implements service {
 	    char confirm = sc.next().charAt(0);
 
 	    if (confirm == 'Y' || confirm == 'y') {
-	    	calDAO.Delete(scheduleNum, CalDate);
+	    	calDAO.Delete(scheduleNum, CalDate, id);
 	    } else {
 	        System.out.println("-- 삭제를 취소합니다. --");
 	    }
