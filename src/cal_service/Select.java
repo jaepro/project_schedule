@@ -26,8 +26,8 @@ public class Select implements service {
 		try {
 			calDate = sc.nextLine();
 			
-			System.out.println();//----------------se
-			calDAO.displaySchedules(calDate);
+			System.out.println();
+			calDAO.displaySchedules(calDate, id);
 			
 		}catch(InputMismatchException e) {
 			//e.printStackTrace();
@@ -74,7 +74,7 @@ public class Select implements service {
 			System.out.println("\t<일정 수정 메뉴>");
 			System.out.println("**********************");
 			System.out.println("\t1. 일정 변경");
-			System.out.println("\t2. 날짜 변경");//---------------------se
+			System.out.println("\t2. 날짜 변경");
 			System.out.println("\t3. 일정 삭제");
 			System.out.println("\t4. 메인 화면");
 			System.out.println("**********************");
@@ -85,12 +85,18 @@ public class Select implements service {
 			try {
 				 num = sc.nextInt();
 				 
-				if(num == 1)
+				if(num == 1) {
 					Update(CalDate); 
-				else if(num == 2) 
-					calDAO.UpdateDate(CalDate, id);//---------------------se
-				else if(num == 3) 
-					Delete(CalDate, id);
+					break;
+				}
+				else if(num == 2) {
+					calDAO.UpdateDate(CalDate, id); 
+					break;
+				}
+				else if(num == 3) {
+					Delete(CalDate, id); 
+					break;
+				}
 				else if(num == 4)
 					break;
 				else {

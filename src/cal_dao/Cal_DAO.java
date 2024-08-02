@@ -280,13 +280,14 @@ public class Cal_DAO{
 		return name;
 	}//LoginCal
 //---------------------------------displaySchedules
-	public void displaySchedules(String CalDate) {
+	public void displaySchedules(String CalDate, String id) {
         getConnection();
-        String sql = "SELECT num, content FROM Calendar WHERE CalDate = ?";
+        String sql = "SELECT num, content FROM Calendar WHERE CalDate = ? AND ID = ? ORDER BY NUM";
 
         try {
             pstmt = con.prepareStatement(sql);
             pstmt.setString(1, CalDate);
+            pstmt.setString(2, id);
             rs = pstmt.executeQuery();
 
             while (rs.next()) {
@@ -309,10 +310,11 @@ public class Cal_DAO{
 	public void UpdateDate(String calDate, String id) {
 		
 		while(true) {
-			System.out.print("\t이동시킬 일정을 선택하세요 : ");
+			System.out.println();
+			System.out.print("\t이동시킬 일정의 번호를 입력하세요 : ");
 		    int scheduleNum = sc.nextInt();
 		    sc.nextLine();  
-		    System.out.print("\t이동할 날짜를 입력하세요(ex. 2024-09-01) : ");
+		    System.out.print("\t이동할 날짜를 8글자로 입력하세요(ex. 20240801) : ");
 		    String newDate = sc.nextLine();
 		    
 		    System.out.println();
@@ -327,7 +329,7 @@ public class Cal_DAO{
 		    
 		    int lastDay = now.getActualMaximum(Calendar.DAY_OF_MONTH);
 		    
-		    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		    Calendar cal = Calendar.getInstance();
 		    
 			    try {
@@ -357,7 +359,7 @@ public class Cal_DAO{
 				    }
 				    
 			    }catch(ParseException e){
-			    	System.out.println("\t날짜 형식 오류 : YYYY-MM-DD 형식으로 입력하세요");
+			    	System.out.println("\t입력 형식 오류, 다시 입력하세요");
 			    	System.out.println();
 			    }
 		}//while
@@ -400,10 +402,9 @@ public class Cal_DAO{
 	        	
 	        	cal_DTO.setId(id);
 	    		cal_DTO.setNum(scheduleNum);
-	    		cal_DTO.setContent(content);
 	    		cal_DTO.setCalDate(changeDate);
 	    		
-	        	getInsert(cal_DTO);
+	    		ChangeInsert(cal_DTO, content);
 	        	Delete(scheduleNum, calDate, id);
 	        	
 	        }
@@ -420,6 +421,59 @@ public class Cal_DAO{
 			}
 		}
 	}
+	//--날짜변경-------------------------------------------------------------
+	public int ChangeInsert(Cal_DTO cal_DTO, String content) {
+		int no = 0;
+		int num = 0;
+		
+		getConnection();
+		try {
+			con.setAutoCommit(false);// 트랜젝션
+			String getNum = "select coalesce(max(num), 0) from calendar where id=? and calDate=?";//coalesce함수는 null이 아닌 첫번째 인자의 값을 반환시켜줌
+			//max(num)의 값이 null 일때 0값이 나올 수 있게해줌. null값이 들어가게 되면 오류가 발생할수도 있기 때문
+			pstmt = con.prepareStatement(getNum);
+			pstmt.setString(1, cal_DTO.getId());
+			pstmt.setString(2, cal_DTO.getCalDate());
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				num = rs.getInt(1) + 1;
+			}
+			rs.close();
+			pstmt.close();
+			
+			String setNum = "insert into calendar values(?,?,?,?)";
+			pstmt = con.prepareStatement(setNum);
+
+			pstmt.setString(1, cal_DTO.getId());
+			pstmt.setInt(2, num);
+			pstmt.setString(3, content);
+			pstmt.setString(4, cal_DTO.getCalDate());
+			
+			no = pstmt.executeUpdate();
+			
+			con.commit();
+		} catch (SQLException e) {
+			if(con != null) { // 오류 발생시 돌아가기
+				try {
+				con.rollback();
+				} catch(SQLException e2) {
+					e2.printStackTrace();
+				}
+			}
+			e.printStackTrace();
+		} finally{ 
+			try {
+				if(rs != null) rs.close();
+				if(pstmt != null) pstmt.close();
+				if(con != null) con.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}//try~catch, finally
+		return no;
+	}//Insert()
+
 //---UpdateDate 날짜변경--------------------------------------------------
 //-------------------------------------------Update
 	public void Update(String newContent, int scheduleNum, String CalDate) {
@@ -730,7 +784,7 @@ public class Cal_DAO{
 				String content = rs.getString("CONTENT");
 						
 				if(content !=null && content.length() >4 ) {
-					contentList.add(content.substring(0,2) + "...");
+					contentList.add(content.substring(0,3) + "...");
 				}else {
                     contentList.add(content + "...");
 				}
