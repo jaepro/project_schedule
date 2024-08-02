@@ -20,7 +20,7 @@ public class Select implements service {
 	public void execute() {
 		
 		String calDate = null;
-		System.out.print("\t날짜를 입력하세요(yyyy-MM-dd) : ");
+		System.out.print("\t날짜를 입력하세요(YYYY-MM-DD) : ");
 		try {
 			calDate = sc.nextLine();
 			

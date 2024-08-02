@@ -196,6 +196,11 @@ public class Cal_DAO{
 	public int getInsert(Cal_DTO cal_DTO) {
 		int no = 0;
 		int num = 0;
+		
+		System.out.print("\t일정을 입력하세요 : ");
+		String content = sc.nextLine();
+		sc.nextLine();
+		
 		getConnection();
 		try {
 			con.setAutoCommit(false);// 트랜젝션
@@ -217,7 +222,7 @@ public class Cal_DAO{
 
 			pstmt.setString(1, cal_DTO.getId());
 			pstmt.setInt(2, num);
-			pstmt.setString(3, cal_DTO.getContent());
+			pstmt.setString(3, content);
 			pstmt.setString(4, cal_DTO.getCalDate());
 			
 			no = pstmt.executeUpdate();
