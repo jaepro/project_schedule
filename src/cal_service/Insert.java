@@ -1,5 +1,6 @@
 package cal_service;
 
+import java.time.LocalDate;
 import java.util.Scanner;
 
 import cal_bean.Cal_DTO;
@@ -29,6 +30,7 @@ public class Insert implements service {
     
 	public void execute() {
 		Scanner sc = new Scanner(System.in);
+		LocalDate date = LocalDate.now();
 		Cal_DAO cal_DAO = new Cal_DAO();
 		Cal_DTO cal_DTO = new Cal_DTO();
 		String calDate;
@@ -41,6 +43,9 @@ public class Insert implements service {
 	            int year = Integer.parseInt(calDate.substring(0, 4));
 	            int month = Integer.parseInt(calDate.substring(4, 6));
 	            int day = Integer.parseInt(calDate.substring(6, 8));
+	            if (year < date.getYear() ||
+	               (year <= date.getYear() && month < date.getMonthValue()) ||
+	               (year <= date.getYear() && month <= date.getMonthValue()) && day < date.getDayOfMonth()) {System.out.println("\t지난 날짜에는 입력이 불가합니다."); continue;}
 	            
 	            if (month >= 1 && month <= 12 && day >= 1 && day <= 31) { // 월과 일의 유효한 값 확인
 	                if ((month == 4 || month == 6 || month == 9 || month == 11) && day > 30) {
@@ -56,12 +61,11 @@ public class Insert implements service {
 	        }
 		}
 		
-		System.out.print("\t일정을 입력하세요 : ");
-		String content = sc.next();
+		
 		
 		cal_DTO.setId(id);
 		cal_DTO.setNum(num);
-		cal_DTO.setContent(content);
+//		cal_DTO.setContent(content);
 		cal_DTO.setCalDate(fomattedCalDate(calDate));
 		
 		int result = cal_DAO.getInsert(cal_DTO);
