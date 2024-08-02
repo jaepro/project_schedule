@@ -33,7 +33,7 @@ public class Cal_DAO{
 	
 	Scanner sc = new Scanner(System.in);
 	
-	//DB
+//--DB-------------------------------------------------------
 	public Cal_DAO() {
 		try {
 			Class.forName(driver);
@@ -49,7 +49,7 @@ public class Cal_DAO{
 				e.printStackTrace();
 			}
 		}// getConnection
-//---------------------------------------------------menu
+//--menu----------------------------------------------------
 	public void menu() {
 		service service = null;
 
@@ -96,7 +96,7 @@ public class Cal_DAO{
 			} //try~catch문
 		} //while 문
 	} //menu
-//------------------------------------------------login할시 메인메뉴 출력
+//--회원 메인메뉴----------------------------------------------
 	public void Mainmenu(String id) {
 		
 		service service = null;
@@ -110,6 +110,7 @@ public class Cal_DAO{
 			System.out.println("\t4. 로그 아웃");
 			System.out.println("**********************");
 			System.out.print("\t번호 입력 : ");
+
 			
 			int num = -1;
 			
@@ -121,7 +122,7 @@ public class Cal_DAO{
 				if(num == 1) 
 					service = new Insert(id);
 				else if(num == 2) 
-					service = new Select();
+					service = new Select(id);
 				else if(num == 3) 
 					service = new Print(id);
 				else {
@@ -141,7 +142,8 @@ public class Cal_DAO{
 			} //try~catch문
 		} //while
 	}//Mainmenu()	
-//-----------------------------------------Signup 회원가입
+	
+//---Signup 회원가입---------------------------------------------
 	public int Signup(Cal_DTO cal_DTO) {
 		int no = 0;
 		getConnection();
@@ -168,7 +170,8 @@ public class Cal_DAO{
 		}//finally
 		return no;
 	}//Signup
-//---------------------------------------------------isExistId 회원가입시 아이디 중복확인
+	
+//---isExistId 회원가입시 아이디 중복확인------------------------------------------------
 	public boolean isExistId(String id) {
 		boolean exist = false;
 		getConnection();
@@ -192,7 +195,7 @@ public class Cal_DAO{
 		}//finally
 		return exist;
 	}//isExistId
-//---------------------------------------------------------getInsert 로그인 후 일정 입력
+//---getInsert 로그인 후 일정 입력------------------------------------------------------
 	public int getInsert(Cal_DTO cal_DTO) {
 		int no = 0;
 		int num = 0;
@@ -287,8 +290,8 @@ public class Cal_DAO{
             rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                System.out.println(rs.getInt("num") + ". " + rs.getString("content"));
-            }
+                System.out.println("\t" + rs.getInt("num") + ". " + rs.getString("content"));
+            }//----------------se
         } catch (SQLException e) {
             e.printStackTrace();
         } finally{ 
@@ -300,7 +303,124 @@ public class Cal_DAO{
 			}
 		}//try~catch, finally
     }
-
+// 김세현 - update
+//---UpdateDate 날짜변경--------------------------------------------------
+	//---날짜 입력받기--------------------------------------------
+	public void UpdateDate(String calDate, String id) {
+		
+		while(true) {
+			System.out.print("\t이동시킬 일정을 선택하세요 : ");
+		    int scheduleNum = sc.nextInt();
+		    sc.nextLine();  
+		    System.out.print("\t이동할 날짜를 입력하세요(ex. 2024-09-01) : ");
+		    String newDate = sc.nextLine();
+		    
+		    System.out.println();
+		    
+		    Date date = new Date();
+		    Calendar now = Calendar.getInstance();
+		    now.setTime(date);
+		    
+		    int nowYear = now.get(Calendar.YEAR);
+		    int nowMonth = now.get(Calendar.MONTH)+1;
+		    int nowDay = now.get(Calendar.DATE);
+		    
+		    int lastDay = now.getActualMaximum(Calendar.DAY_OF_MONTH);
+		    
+		    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		    Calendar cal = Calendar.getInstance();
+		    
+			    try {
+				    Date chaDate = sdf.parse(newDate);
+				    cal.setTime(chaDate);
+				    
+				    int newYear = cal.get(Calendar.YEAR);
+				    int newMonth = cal.get(Calendar.MONTH)+1;
+				    int newDay = cal.get(Calendar.DATE);
+				    
+				    Calendar cal2 = Calendar.getInstance();
+				    cal2.add(Calendar.YEAR, 30);
+				    int sysYear = cal2.get(Calendar.YEAR);
+				    
+				    if(newYear >= nowYear && newYear <= sysYear) {
+				    	if(newMonth >= nowMonth && newMonth <=12) {
+				    		if(newMonth == nowMonth && newDay >= nowDay && newDay <=lastDay || newMonth >= nowMonth && newDay <=lastDay && newDay >0) {
+				    			ChangeDate(scheduleNum, newYear, newMonth, newDay, calDate, id);
+				    			System.out.println("일정이 이동되었습니다");
+				    			break;
+				    		}
+				    		System.out.println("\t유효하지 않는 월입니다");
+				    		continue;
+				    	}
+				    	System.out.println("\t유효하지 않는 년도입니다");
+				    	continue;
+				    }
+				    
+			    }catch(ParseException e){
+			    	System.out.println("\t날짜 형식 오류 : YYYY-MM-DD 형식으로 입력하세요");
+			    	System.out.println();
+			    }
+		}//while
+		
+	}
+	//---changeDate 날짜 변경--------------------------------------------
+	public void ChangeDate(int scheduleNum, int newYear, int newMonth, int newDay, String calDate, String id) {
+		Cal_DTO cal_DTO = new Cal_DTO();
+		
+		String changeDate = null;
+		
+		if(newMonth < 10 && newMonth > 0) {
+			if(newDay < 10 && newDay > 0) {
+				changeDate = newYear + "-0" + newMonth + "-0" + newDay;
+			}else if(newDay >= 10) {
+				changeDate = newYear + "-0" + newMonth + "-" + newDay;
+			}
+		}else if(newMonth >= 10 && newMonth <= 12) {
+			if(newDay < 10 && newDay > 0) {
+				changeDate = newYear + "-" + newMonth + "-0" + newDay;
+			}else if(newDay >= 10) {
+				changeDate = newYear + "-" + newMonth + "-" + newDay;
+			}
+		}
+		
+		getConnection();
+		String sql = "SELECT CONTENT FROM CALENDAR WHERE ID = ? AND CALDATE = ? AND NUM = ?";
+		
+		try {
+			pstmt = con.prepareStatement(sql);
+			
+			pstmt.setString(1, id);
+	        pstmt.setString(2, calDate);
+	        pstmt.setInt(3, scheduleNum);
+	        
+	        rs = pstmt.executeQuery();
+	        
+	        if(rs.next()) {
+	        	String content = rs.getString("content");
+	        	
+	        	cal_DTO.setId(id);
+	    		cal_DTO.setNum(scheduleNum);
+	    		cal_DTO.setContent(content);
+	    		cal_DTO.setCalDate(changeDate);
+	    		
+	        	getInsert(cal_DTO);
+	        	Delete(scheduleNum, calDate, id);
+	        	
+	        }
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally{ 
+			try {
+				if(rs != null) rs.close();
+				if(pstmt != null) pstmt.close();
+				if(con != null) con.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+//---UpdateDate 날짜변경--------------------------------------------------
 //-------------------------------------------Update
 	public void Update(String newContent, int scheduleNum, String CalDate) {
         getConnection();
@@ -330,15 +450,16 @@ public class Cal_DAO{
 		}//try~catch, finally
     }	
 //----------------------------------------delete	
-	public void Delete(int num, String CalDate) {
+	public void Delete(int num, String CalDate, String id) {
         getConnection();
-        String deleteSql = "delete from Calendar where calDate = ? and num = ?";
-        String updateSql = "update Calendar set num = num - 1 where calDate = ? and num > ?";
+        String deleteSql = "delete from Calendar where calDate = ? and num = ? and id =?";
+        String updateSql = "update Calendar set num = num - 1 where calDate = ? and num > ? and id = ?";
 
         try {
             pstmt = con.prepareStatement(deleteSql);
             pstmt.setString(1, CalDate);
             pstmt.setInt(2, num);
+            pstmt.setString(3, id);
 
             int rowsDeleted = pstmt.executeUpdate();
             if (rowsDeleted > 0) {
@@ -347,6 +468,7 @@ public class Cal_DAO{
                
                 pstmt.setString(1, CalDate);
                 pstmt.setInt(2, num);
+                pstmt.setString(3, id);
                 pstmt.executeUpdate();
                 System.out.println("-- 일정 번호가 업데이트되었습니다. --");
             } else {
@@ -367,20 +489,68 @@ public class Cal_DAO{
 //----print 달력 출력----------------------------------------------------
 	public void Calenderprint(String id) throws ParseException{
 		String year, month;
-		Date date;
 		Scanner scan = new Scanner(System.in);
 		
-		System.out.println();
-		System.out.print("\t년도 입력 : ");
-		year = scan.next();
-		System.out.print("\t월 입력 : ");
-		month = scan.next();
+		Calendar cal = Calendar.getInstance();
+		Date date = new Date();	
+		cal.setTime(date);
+		
+		while(true) {
+			System.out.println();
+			System.out.print("\t년도 입력 : ");
+			year = scan.next();
+		
+			cal.add(Calendar.YEAR, 30);
+			
+			int sysYear = cal.get(Calendar.YEAR);
+			
+			int checkYear;
+			try {
+				checkYear = Integer.parseInt(year);
+			}catch (NumberFormatException e) {
+				System.out.println("숫자를 입력해 주세요");
+				return;
+			}
+			
+			if(checkYear >= 1900 && checkYear <= sysYear) {
+				System.out.print("\t월 입력 : ");
+				month = scan.next();
+				
+				int checkMonth;
+				
+				try {
+					checkMonth = Integer.parseInt(month);
+				}catch (NumberFormatException e) {
+					System.out.println("숫자를 입력해 주세요");
+					return;
+				}
+				
+				if(checkMonth > 0 && checkMonth <= 12) {
+					ChangePrint(id, year, month);
+					break;
+				}else {
+					System.out.println("\t지원하지 않는 달 입니다.");
+					continue;
+				}
+				
+			}else {
+				System.out.println("\t지원하지 않는 년도 입니다.");
+				continue;
+			}
+			
+		}
+	}
+	// 날짜 변형해서 보내기---------------------------
+	public void ChangePrint(String id, String year, String month) throws ParseException {
+		Date date;
+		
+		int monthInt = Integer.parseInt(month);
 		
 		System.out.println();
-		System.out.println(year + "년 " + month + "월 달력");
+		System.out.println(year + "년 " + monthInt + "월 달력");
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMd");
-		date = sdf.parse(year+month+"1");
+		date = sdf.parse(year+monthInt+"1");
 		
 		String calc = calc(date);
 		
@@ -388,14 +558,13 @@ public class Cal_DAO{
 		int start = Integer.parseInt(cal[0]);
 		int last = Integer.parseInt(cal[1]);
 		
-		String[][] result =  printDB(id, year, month);
+		String[][] result =  printDB(id, year, monthInt);
 		
 		String[] yesCal = result[0];
 		String[] count = result[1];
-		String[] content = printContent(id, year, month);
+		String[] content = printContent(id, year, monthInt);
 		
 		display(start, last, yesCal, count, content);
-		
 	}
 	//----print calc-------------------
 	public String calc(Date date) throws ParseException {
@@ -406,6 +575,7 @@ public class Cal_DAO{
 		
 		start = cal.get(Calendar.DAY_OF_WEEK);
 		last = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+
 		return start + "/" + last;
 	}
 	//----print display-------------------
@@ -476,16 +646,15 @@ public class Cal_DAO{
 //----print 달력 출력---------------------------------------------------
 
 //----print DB-------------------------------------------------------
-	public String[][] printDB(String id, String year, String month) {
+	public String[][] printDB(String id, String year, int month) {
 		List<String> dateList = new ArrayList<>();
         List<String> countList = new ArrayList<>();
         
 		String dateAll = null;
 
-		int monthInt = Integer.parseInt(month);
-		if(monthInt < 10 && monthInt > 0) {
+		if(month < 10 && month > 0) {
 			dateAll = year + "-0" + month;
-		}else if(monthInt >= 10 && monthInt <= 12) {
+		}else if(month >= 10 && month <= 12) {
 			dateAll = year + "-" + month;
 		}
 		
@@ -533,15 +702,14 @@ public class Cal_DAO{
 	    return new String[][] { yesCal, count };
 	}
 	//----print Content-------------------
-	public String[] printContent(String id, String year, String month) {
+	public String[] printContent(String id, String year, int month) {
 		List<String> contentList = new ArrayList<String>();
 		
 		String dateAll = null;
 
-		int monthInt = Integer.parseInt(month);
-		if(monthInt < 10 && monthInt > 0) {
+		if(month < 10 && month > 0) {
 			dateAll = year + "-0" + month;
-		}else if(monthInt >= 10 && monthInt <= 12) {
+		}else if(month >= 10 && month <= 12) {
 			dateAll = year + "-" + month;
 		}
 		
@@ -562,7 +730,7 @@ public class Cal_DAO{
 				String content = rs.getString("CONTENT");
 						
 				if(content !=null && content.length() >4 ) {
-					contentList.add(content.substring(0,3) + "...");
+					contentList.add(content.substring(0,2) + "...");
 				}else {
                     contentList.add(content + "...");
 				}
