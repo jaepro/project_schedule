@@ -326,65 +326,80 @@ public class Cal_DAO {
 //---UpdateDate 날짜변경--------------------------------------------------
 	// ---날짜 입력받기--------------------------------------------
 	public void UpdateDate(String db_calDate, String id) {
-		
-		String deleteSql = "delete from Calendar where calDate = ? and num = ? and id =?";
-
 		while (true) {
+            System.out.println();
+            
+			int scheduleNum = -1;
+			String newDate = null;
+		
+			while (scheduleNum < 0) {
+		        try {
+		            System.out.print("\t이동시킬 일정의 번호를 입력하세요 : ");
+		            scheduleNum = sc.nextInt();
+		            sc.nextLine(); // Consume newline
+		        } catch (InputMismatchException e) {
+		            System.out.println("\t잘못된 입력입니다. 숫자만 입력하세요.");
+		            sc.nextLine(); // Clear the invalid input
+		            System.out.println();
+		        }
+		    }
+			
+			while (newDate == null) {
+		        System.out.print("\t이동할 날짜를 8글자로 입력하세요(ex. 20240801) : ");
+		        newDate = sc.nextLine();
+		        
+		        // 날짜 형식 및 유효성 검사
+		        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		        sdf.setLenient(false);
+		        try {
+		            Date chaDate = sdf.parse(newDate);
+		        } catch (ParseException e) {
+		            System.out.println("\t입력 형식 오류, 다시 입력하세요");
+		            newDate = null;
+		            System.out.println();
+		        }
+		    }
+		
 			System.out.println();
-			System.out.print("\t이동시킬 일정의 번호를 입력하세요 : ");
-			int scheduleNum = sc.nextInt();
-			sc.nextLine();
-			System.out.print("\t이동할 날짜를 8글자로 입력하세요(ex. 20240801) : ");
-			String newDate = sc.nextLine();
-
-			System.out.println();
-
+			
 			Date date = new Date();
 			Calendar now = Calendar.getInstance();
 			now.setTime(date);
-
+		
 			int nowYear = now.get(Calendar.YEAR);
 			int nowMonth = now.get(Calendar.MONTH) + 1;
 			int nowDay = now.get(Calendar.DATE);
-
+		
 			int lastDay = now.getActualMaximum(Calendar.DAY_OF_MONTH);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			Calendar cal = Calendar.getInstance();
-
+		
 			try {
 				Date chaDate = sdf.parse(newDate);
 				cal.setTime(chaDate);
-
+		
 				int newYear = cal.get(Calendar.YEAR);
 				int newMonth = cal.get(Calendar.MONTH) + 1;
 				int newDay = cal.get(Calendar.DATE);
-
+		
 				Calendar cal2 = Calendar.getInstance();
 				cal2.add(Calendar.YEAR, 30);
 				int sysYear = cal2.get(Calendar.YEAR);
-
+		
 				if (newYear >= nowYear && newYear <= sysYear) {
 					if (newMonth >= nowMonth && newMonth <= 12) {
 						if (newMonth == nowMonth && newDay >= nowDay && newDay <= lastDay
 								|| newMonth >= nowMonth && newDay <= lastDay && newDay > 0) {
-							ChangeDate(scheduleNum, newYear, newMonth, newDay, db_calDate, id);
-							getConnection();
 							
-							 try {
-								pstmt = con.prepareStatement(deleteSql);
-								
-								pstmt.setString(1, db_calDate);
-						        pstmt.setInt(2, scheduleNum);
-						        pstmt.setString(3, id);
-						        int rowsDeleted = pstmt.executeUpdate();
-								
-							} catch (SQLException e) {
-								
-								e.printStackTrace();
+							int checknum = ChangeDate(scheduleNum, newYear, newMonth, newDay, db_calDate, id);
+							
+							if(checknum == 1) {
+								continue;
+							} else {
+								System.out.println("\t일정이 이동되었습니다");
+								break;
 							}
 							
-							System.out.println("일정이 이동되었습니다");
-							break;
 						}
 						System.out.println("\t유효하지 않는 월입니다");
 						continue;
@@ -392,34 +407,21 @@ public class Cal_DAO {
 					System.out.println("\t유효하지 않는 년도입니다");
 					continue;
 				}
-
+		
 			} catch (ParseException e) {
 				System.out.println("\t입력 형식 오류, 다시 입력하세요");
 				System.out.println();
 			} //try~catch
-		} // while
-
+		}
 	}
 
 	// ---changeDate 날짜 변경--------------------------------------------
-	public void ChangeDate(int scheduleNum, int newYear, int newMonth, int newDay, String calDate, String id) {
+	public int ChangeDate(int scheduleNum, int newYear, int newMonth, int newDay, String calDate, String id) {
+		
 		Cal_DTO cal_DTO = new Cal_DTO();
+		int checknum = 0;
 
-		String changeDate = null;
-
-		if (newMonth < 10 && newMonth > 0) {
-			if (newDay < 10 && newDay > 0) {
-				changeDate = newYear + "-0" + newMonth + "-0" + newDay;
-			} else if (newDay >= 10) {
-				changeDate = newYear + "-0" + newMonth + "-" + newDay;
-			}
-		} else if (newMonth >= 10 && newMonth <= 12) {
-			if (newDay < 10 && newDay > 0) {
-				changeDate = newYear + "-" + newMonth + "-0" + newDay;
-			} else if (newDay >= 10) {
-				changeDate = newYear + "-" + newMonth + "-" + newDay;
-			}
-		}
+		String changeDate = String.format("%d-%02d-%02d", newYear, newMonth, newDay);
 
 		getConnection();
 		String sql = "SELECT CONTENT FROM CALENDAR WHERE ID = ? AND CALDATE = ? AND NUM = ?";
@@ -435,29 +437,52 @@ public class Cal_DAO {
 
 			if (rs.next()) {
 				String content = rs.getString("content");
+				
+				String sql2 = "SELECT MAX(NUM) AS cal_Num FROM CALENDAR WHERE ID = ? AND CALDATE = ?";
+				
+				pstmt = con.prepareStatement(sql2);
 
-				cal_DTO.setId(id);
-				cal_DTO.setNum(scheduleNum);
-				cal_DTO.setCalDate(changeDate);
-				ChangeInsert(cal_DTO, content);
-				//Delete(calDate, id);
+				pstmt.setString(1, id);
+				pstmt.setString(2, calDate);
 
+				rs = pstmt.executeQuery();
+
+				if (rs.next()) {
+					int max = rs.getInt("cal_Num");
+					
+					cal_DTO.setId(id);
+					cal_DTO.setNum(scheduleNum);
+					cal_DTO.setCalDate(changeDate);
+					cal_DTO.setMax(max);
+					
+					if(scheduleNum > 0 && scheduleNum <= max) {
+						ChangeInsert(cal_DTO, content);
+						changeDelete(calDate, id, scheduleNum);
+						checknum = 0;
+					} else {
+						System.out.println("\t없는 일정입니다. 번호를 다시 입력하세요.");
+						checknum = 1;
+					}
+				}
+
+			} else {
+				System.out.println("\t없는 일정입니다. 번호를 다시 입력하세요.");
+				checknum = 1;
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (con != null)
-					con.close();
+				if (rs != null) rs.close();
+				if (pstmt != null) pstmt.close();
+				if (con != null) con.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
+		
+		return checknum;
 	}
 
 	// --날짜변경-------------------------------------------------------------
@@ -466,12 +491,11 @@ public class Cal_DAO {
 		int num = 0;
 
 		getConnection();
+		
 		try {
 			con.setAutoCommit(false);// 트랜젝션
-			String getNum = "select coalesce(max(num), 0) from calendar where id=? and calDate=?";// coalesce함수는 null이
-																									// 아닌 첫번째 인자의 값을
-																									// 반환시켜줌
-			// max(num)의 값이 null 일때 0값이 나올 수 있게해줌. null값이 들어가게 되면 오류가 발생할수도 있기 때문
+			String getNum = "select coalesce(max(num), 0) from calendar where id=? and calDate=?";
+			
 			pstmt = con.prepareStatement(getNum);
 			pstmt.setString(1, cal_DTO.getId());
 			pstmt.setString(2, cal_DTO.getCalDate());
@@ -505,18 +529,53 @@ public class Cal_DAO {
 			e.printStackTrace();
 		} finally {
 			try {
-				if (rs != null)
-					rs.close();
-				if (pstmt != null)
-					pstmt.close();
-				if (con != null)
-					con.close();
+				if (rs != null) rs.close();
+				if (pstmt != null) pstmt.close();
+				if (con != null) con.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		} // try~catch, finally
 		return no;
 	}// Insert()
+	
+	//내용 삭제
+	public void changeDelete(String calDate, String id, int scheduleNum) {
+		String deleteSql = "DELETE FROM CALENDAR WHERE ID = ? AND CALDATE = ? AND NUM = ?";
+		String updateSql = "UPDATE CALENDAR SET NUM = NUM - 1 WHERE CALDATE = ? AND NUM > ? AND ID = ?";
+
+		try {
+			getConnection();
+			
+            pstmt = con.prepareStatement(deleteSql);
+            pstmt.setString(1, id);
+            pstmt.setString(2, calDate);
+            pstmt.setInt(3, scheduleNum);
+            
+            pstmt.executeUpdate();
+            
+            pstmt = con.prepareStatement(updateSql);
+            pstmt.setString(1, calDate);
+            pstmt.setInt(2, scheduleNum);
+            pstmt.setString(3, id);
+            
+            pstmt.executeUpdate();
+            
+		}catch(SQLException e) {
+			e.printStackTrace();
+		}finally {
+				try {
+					if (rs != null) rs.close();
+					if (pstmt != null) pstmt.close();
+					if (con != null) con.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+		}
+           
+	}//
 
 //---UpdateDate 날짜변경--------------------------------------------------
 //-------------------------------------------Update
@@ -843,8 +902,17 @@ public class Cal_DAO {
 			}
 			if (ischeckDay) {
 				System.out.print(i + "\t");
-				lineBelow.append(count[n]).append("개의 일정\t");
-				lineBelow2.append(content[n]).append("\t");
+				if(n < count.length) {
+					lineBelow.append(count[n]).append("개의 일정\t");
+				}else {
+					lineBelow2.append(content[n]).append("\t");
+				}
+				if (n < content.length) {
+	                lineBelow2.append(content[n]).append("\t");
+	            } else {
+	                lineBelow2.append("\t");
+	            }
+				
 				n++;
 			} else {
 				System.out.print(i + "\t");
@@ -884,7 +952,7 @@ public class Cal_DAO {
 
 		getConnection();
 
-		String sql = "SELECT COUNT(*) AS COUNT, CALDATE FROM CALENDAR WHERE ID = ? AND CALDATE LIKE ? GROUP BY CALDATE";
+		String sql = "SELECT COUNT(*) AS COUNT, CALDATE FROM CALENDAR WHERE ID = ? AND CALDATE LIKE ? GROUP BY CALDATE order by caldate";
 		try {
 			pstmt = con.prepareStatement(sql);
 
@@ -940,7 +1008,7 @@ public class Cal_DAO {
 
 		getConnection();
 
-		String sql = "SELECT CONTENT FROM CALENDAR WHERE ID = ? AND CALDATE LIKE ? AND NUM = 1 ";
+		String sql = "SELECT CONTENT FROM CALENDAR WHERE ID = ? AND CALDATE LIKE ? AND NUM = 1 ORDER BY CALDATE, num";
 		try {
 			pstmt = con.prepareStatement(sql);
 
