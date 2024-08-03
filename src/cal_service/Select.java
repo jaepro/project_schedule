@@ -2,6 +2,9 @@ package cal_service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.InputMismatchException;
@@ -20,22 +23,7 @@ public class Select implements service {
 	
 	@Override
 	public void execute() {
-		/*
-		String calDate = null;
-		System.out.print("\t날짜를 입력하세요(YYYY-MM-DD) : ");
-		try {
-			calDate = sc.nextLine();
-			
-			System.out.println();
-			calDAO.displaySchedules(calDate, id);
-			
-		}catch(InputMismatchException e) {
-			//e.printStackTrace();
-			System.out.println();
-			System.out.println("-- 형식에 맞게 입력하세요. --");
-			System.out.println();
-		}
-*/
+		
 		String calDate = null;
 		String db_calDate = null;
 		
@@ -43,19 +31,40 @@ public class Select implements service {
 			System.out.print("\t날짜를 입력하세요(yyyymmdd) : ");
 			calDate = sc.next();
 			
-			if(calDate.length() == 8 && calDate.matches("\\d+")) {
-                db_calDate = calDate.substring(0, 4) + "-" + calDate.substring(4, 6) + "-" + calDate.substring(6, 8);
-                
-                System.out.println();
-                calDAO.displaySchedules(db_calDate, id);
-                break;
-                
-            } else {
-                System.out.println();
-                System.out.println("-- 8자리 숫자를 제대로 입력하세요. --");
-                System.out.println();
-            }
-        }
+			 if (calDate.length() == 8 && calDate.matches("\\d+")) {
+			        try {
+			            // 입력된 문자열을 LocalDate로 변환
+			            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+			            LocalDate date = LocalDate.parse(calDate, formatter);
+			            
+			         // 연도 제한 (1990년부터 현재 연도 + 30년까지만 허용)
+			            int year = date.getYear();
+			            int currentYear = LocalDate.now().getYear();
+			            if (year < 1990 || year > currentYear + 30) {
+			                System.out.println();
+			                System.out.println("-- 연도는 1990년부터 " + (currentYear + 30) + "년까지만 입력 가능합니다. 다시 입력하세요. --");
+			                System.out.println();
+			                continue;
+			            }
+			            
+			            db_calDate = date.toString(); // yyyy-MM-dd 형식으로 자동 변환
+			            
+			            System.out.println();
+			            calDAO.displaySchedules(db_calDate, id);
+			            break;
+			            
+			        } catch (DateTimeParseException e) {
+			            // 유효하지 않은 날짜일 경우 예외 발생
+			            System.out.println();
+			            System.out.println("-- 유효하지 않은 날짜입니다. 다시 입력하세요. --");
+			            System.out.println();
+			        }
+			    } else {
+			        System.out.println();
+			        System.out.println("-- 8자리 숫자를 제대로 입력하세요. --");
+			        System.out.println();
+			    }
+        } //while
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); //calDate를 date형식으로 바꿈
 		Date inputDate = null;

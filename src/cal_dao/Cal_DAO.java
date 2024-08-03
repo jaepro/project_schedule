@@ -423,7 +423,7 @@ public class Cal_DAO {
 				cal_DTO.setNum(scheduleNum);
 				cal_DTO.setCalDate(changeDate);
 				ChangeInsert(cal_DTO, content);
-				Delete(calDate, id);
+				//Delete(calDate, id);
 
 			}
 		} catch (SQLException e) {
@@ -588,7 +588,7 @@ public class Cal_DAO {
 //----------------------------------------delete	
 	
 	public void Delete(String db_calDate, String id) {
-		//--getConnection();
+		
 		int maxNum = 0;
 	    int scheduleNum = 0;
 		

@@ -71,7 +71,6 @@ public class Insert implements service {
 		
 		cal_DTO.setId(id);
 		cal_DTO.setNum(num);
-//		cal_DTO.setContent(content); 여기 클래스에서 넣어줬었는데 데이터베이스에 넣으려고 할때 null값이 계속 들어가서 DAO에서 실행해줌
 		cal_DTO.setCalDate(fomattedCalDate(calDate));
 		
 		int result = cal_DAO.getInsert(cal_DTO);
