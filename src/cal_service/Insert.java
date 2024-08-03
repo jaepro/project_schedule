@@ -47,7 +47,7 @@ public class Insert implements service {
 		
 			
 		while(true) {
-			System.out.print("\\t날짜 8자리를 입력하세요 (YYYYMMDD) : ");
+			System.out.print("\t날짜 8자리를 입력하세요 (YYYYMMDD) : ");
 			calDate = sc.next(); 
 			
 			if (calDate.matches("\\d{8}")) {

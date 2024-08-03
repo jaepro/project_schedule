@@ -326,6 +326,8 @@ public class Cal_DAO {
 //---UpdateDate 날짜변경--------------------------------------------------
 	// ---날짜 입력받기--------------------------------------------
 	public void UpdateDate(String db_calDate, String id) {
+		
+		String deleteSql = "delete from Calendar where calDate = ? and num = ? and id =?";
 
 		while (true) {
 			System.out.println();
@@ -366,6 +368,21 @@ public class Cal_DAO {
 						if (newMonth == nowMonth && newDay >= nowDay && newDay <= lastDay
 								|| newMonth >= nowMonth && newDay <= lastDay && newDay > 0) {
 							ChangeDate(scheduleNum, newYear, newMonth, newDay, db_calDate, id);
+							getConnection();
+							
+							 try {
+								pstmt = con.prepareStatement(deleteSql);
+								
+								pstmt.setString(1, db_calDate);
+						        pstmt.setInt(2, scheduleNum);
+						        pstmt.setString(3, id);
+						        int rowsDeleted = pstmt.executeUpdate();
+								
+							} catch (SQLException e) {
+								
+								e.printStackTrace();
+							}
+							
 							System.out.println("일정이 이동되었습니다");
 							break;
 						}
@@ -379,7 +396,7 @@ public class Cal_DAO {
 			} catch (ParseException e) {
 				System.out.println("\t입력 형식 오류, 다시 입력하세요");
 				System.out.println();
-			}
+			} //try~catch
 		} // while
 
 	}
@@ -592,11 +609,6 @@ public class Cal_DAO {
 		int maxNum = 0;
 	    int scheduleNum = 0;
 		
-		//System.out.print("\t삭제할 일정의 번호를 입력하세요 : ");
-	    //scheduleNum = sc.nextInt();
-
-	   //-- System.out.print("\t정말 삭제 하시겠습니까? (Y/N) : ");
-	   //-- char confirm = sc.next().charAt(0);
 	    
 		String deleteSql = "delete from Calendar where calDate = ? and num = ? and id =?";
 		String updateSql = "update Calendar set num = num - 1 where calDate = ? and num > ? and id = ?";
