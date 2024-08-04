@@ -623,7 +623,6 @@ public class Cal_DAO {
 
 	        // 일정 업데이트
 	        String sql = "update Calendar set content = ? where num = ? and caldate = ?";
-	        String updatenum = "update Calendar set num = num-1 where num > ? and caldate  = ?";
 	        
 	        pstmt = con.prepareStatement(sql);
 	        pstmt.setString(1, newContent);
@@ -633,11 +632,7 @@ public class Cal_DAO {
 
 	        if (su > 0) {
 	            System.out.println("-- 일정 업데이트가 성공적이었습니다. --");
-	            pstmt = con.prepareStatement(updatenum);
-		        
-		        pstmt.setInt(1, scheduleNum);
-		        pstmt.setString(2, db_calDate);
-		        int su2 = pstmt.executeUpdate();
+	           
 	        } else {
 	            System.out.println("-- 일정을 찾을 수 없습니다. --");
 	        }
