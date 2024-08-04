@@ -51,7 +51,7 @@ public class Membership implements service {
                    //현재 날짜 기준으로 넘어가는 날짜는 가입불가.
             	if(year >= 1900 && getYear > year) { // 입력한 연도가 관리자가 설정한 연도안에 들어오는지 확인
             		if(month > 0 && month < 13) { // 입력한 월이 1~12 중에 선택되었는지 확인
-            			if(day < getLastDay && day > getFirstDay) break; // 입력한 날짜가 해당 달에 있는 날짜인지 확인
+            			if(day <= getLastDay && day >= getFirstDay) break; // 입력한 날짜가 해당 달에 있는 날짜인지 확인
             			else {
             				System.out.println("\t유효한 일을 입력해주세요.");
             				continue;
